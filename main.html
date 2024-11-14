@@ -1,42 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор комментариев на Python</title>
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <title>Редактор комментариев для Python</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+        }
+        .line-numbers {
+            background-color: #f0f0f0;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+            text-align: right;
+            user-select: none; /* Запретить выделение текста */
+        }
+        .comments {
+            width: 100%;
+            height: 300px;
+            overflow: auto;
+            resize: vertical;
+        }
+    </style>
 </head>
 <body>
-    <h1>Генератор комментариев для Python</h1>
-    <input type="file" id="fileInput" accept=".py">
-    <button id="generateButton">Сгенерировать комментарии</button>
-    <pre id="output"></pre>
 
-    <py-script>
-        from js import document, FileReader
+<h1>Редактор комментариев для Python</h1>
+<input type="file" id="fileInput" accept=".py">
+<button onclick="loadFile()">Загрузить файл</button>
 
-        def count_lines(file_content):
-            lines = file_content.splitlines()
-            line_count = len(lines)
-            comment = f'"""\nЭтот файл содержит {line_count} строк кода.\n"""'
-            return line_count, comment
+<div class="container" id="editor" style="display: none;">
+    <div class="line-numbers" id="lineNumbers"></div>
+    <textarea class="comments" id="commentArea" placeholder="Введите ваши заметки здесь..."></textarea>
+</div>
 
-        def handle_file(event):
-            file_input = document.getElementById('fileInput')
-            file = file_input.files[0]
-            reader = FileReader.new()
+<script>
+    function loadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        const lineNumbersDiv = document.getElementById('lineNumbers');
+        const commentArea = document.getElementById('commentArea');
 
-            def onload(event):
-                file_content = event.target.result
-                line_count, comment = count_lines(file_content)
-                output = document.getElementById('output')
-                output.textContent = f'Количество строк: {line_count}\n\nСгенерированный комментарий:\n{comment}'
+        if (!file) {
+            alert('Пожалуйста, выберите файл .py');
+            return;
+        }
 
-            reader.bind('load', onload)
-            reader.readAsText(file)
+        const reader = new FileReader();
 
-        document.getElementById('generateButton').bind('click', handle_file)
-    </py-script>
+        reader.onload = function(e) {
+            const code = e.target.result;
+            const lines = code.split('\n');
+
+            // Генерация номера строк
+            lineNumbersDiv.innerHTML = '';
+            for (let i = 0; i < lines.length; i++) {
+                lineNumbersDiv.innerHTML += (i + 1) + '<br>';
+            }
+
+            // Очищаем текстовое поле для комментариев
+            commentArea.value = '';
+            for (let i = 0; i < lines.length; i++) {
+                commentArea.value += '\n';  // Добавляем пустые строки для комментариев
+            }
+
+            document.getElementById('editor').style.display = 'flex';
+        }
+
+        reader.readAsText(file);
+    }
+</script>
+
 </body>
 </html>
