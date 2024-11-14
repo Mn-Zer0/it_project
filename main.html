@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор комментариев на Python</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+<body>
+    <h1>Генератор комментариев для Python</h1>
+    <input type="file" id="fileInput" accept=".py">
+    <button id="generateButton">Сгенерировать комментарии</button>
+    <pre id="output"></pre>
+
+    <py-script>
+        from js import document, FileReader
+
+        def count_lines(file_content):
+            lines = file_content.splitlines()
+            line_count = len(lines)
+            comment = f'"""\nЭтот файл содержит {line_count} строк кода.\n"""'
+            return line_count, comment
+
+        def handle_file(event):
+            file_input = document.getElementById('fileInput')
+            file = file_input.files[0]
+            reader = FileReader.new()
+
+            def onload(event):
+                file_content = event.target.result
+                line_count, comment = count_lines(file_content)
+                output = document.getElementById('output')
+                output.textContent = f'Количество строк: {line_count}\n\nСгенерированный комментарий:\n{comment}'
+
+            reader.bind('load', onload)
+            reader.readAsText(file)
+
+        document.getElementById('generateButton').bind('click', handle_file)
+    </py-script>
+</body>
+</html>
